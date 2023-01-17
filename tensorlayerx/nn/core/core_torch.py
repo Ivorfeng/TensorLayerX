@@ -7,6 +7,7 @@ from .common import _save_weights, _load_weights, _save_standard_weights_dict, _
 from torch.nn.parameter import Parameter
 from typing import Any, Callable
 import torch
+import torch_mlu
 import operator
 from itertools import islice
 from collections import OrderedDict, abc as container_abcs

@@ -75,6 +75,7 @@ elif BACKEND == 'torch':
     from .torch_nn import *
     from .torch_backend import *
     import torch
+    import torch_mlu
     BACKEND_VERSION = torch.__version__
     sys.stderr.write('Using PyTorch backend.\n')
 elif BACKEND == 'oneflow':

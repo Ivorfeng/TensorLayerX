@@ -102,6 +102,7 @@ def default_collate_tf(batch):
 
 def default_collate_torch(batch):
     import torch
+    import torch_mlu
     elem = batch[0]
     elem_type = type(elem)
     if isinstance(elem, torch.Tensor):

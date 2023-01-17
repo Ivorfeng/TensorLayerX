@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function
 from .torch_nn import nchw_to_nhwc, nhwc_to_nchw
 import torch
+import torch_mlu
 import torch.nn.functional as F
 import numpy as np
 import random
@@ -72,6 +73,8 @@ def zeros(shape, dtype=None, device = None):
         device = torch.device('cpu')
     elif device == 'gpu':
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    elif device == 'mlu':
+        device = torch.device('mlu:0' if torch.mlu.is_available() else 'cpu')
     return torch.zeros(size=shape, dtype=dtype, device = device)
 
 
@@ -95,6 +98,8 @@ def ones(shape, dtype=None, device = None):
         device = torch.device('cpu')
     elif device == 'gpu':
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    elif device == 'mlu':
+        device = torch.device('mlu:0' if torch.mlu.is_available() else 'cpu')
     return torch.ones(size=shape, dtype=dtype, device = device)
 
 
@@ -120,6 +125,8 @@ def constant(value, dtype=None, shape=None, device =None):
         device = torch.device('cpu')
     elif device == 'gpu':
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    elif device == 'mlu':
+        device = torch.device('mlu:0' if torch.mlu.is_available() else 'cpu')
     w = torch.empty(size=shape, dtype=dtype, device = device)
     return torch.nn.init.constant_(w, value)
 
@@ -461,6 +468,8 @@ def convert_to_tensor(value, dtype=None, device = None):
         device = torch.device('cpu')
     elif device == 'gpu':
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    elif device == 'mlu':
+        device = torch.device('mlu:0' if torch.mlu.is_available() else 'cpu')
     return torch.tensor(value, dtype=dtype, device = device)
 
 
@@ -1650,7 +1659,8 @@ def unsorted_segment_max(x, segment_ids, num_segments):
 def set_seed(seed):
 
     torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    #torch.cuda.manual_seed_all(seed)
+    torch.mlu.manual_seed_all(seed)
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
@@ -1705,10 +1715,13 @@ class Einsum(object):
     def __call__(self, *args):
         return torch.einsum(self.equation, *args)
 
-def set_device(device = 'GPU', id = 0):
+def set_device(device = 'MLU', id = 0):
     if device == 'GPU':
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
         torch.cuda.set_device(id)
+    if device == 'MLU':
+        torch.set_default_tensor_type('torch.mlu.FloatTensor')
+        torch.mlu.set_device(id)
 
 def scatter_update(tensor, indices, updates):
     tensor = torch.tensor(tensor)
@@ -1719,17 +1732,19 @@ def scatter_update(tensor, indices, updates):
 
 def get_device():
     try:
-        id = torch.cuda.current_device()
-        device = 'GPU:' + str(id)
+        id = torch.mlu.current_device()
+        device = 'mlu:' + str(id)
         return device
     except:
         device = 'CPU'
         return device
 
-def to_device(tensor, device='GPU', id=0):
+def to_device(tensor, device='mlu', id=0):
     device = device.lower()
     if device == 'gpu':
         device = 'cuda' + ':' + str(id)
+    if device == 'mlu':
+        device = 'mlu' + ':' + str(id)
     tensor = tensor.detach().to(device)
     return tensor
 

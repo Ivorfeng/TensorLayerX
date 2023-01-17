@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 import torch.optim as optimizer
 from torch.optim import _functional as F
 import torch
+import torch_mlu
 from tensorlayerx.optimizers.lr import LRScheduler
 
 __all__ = ['Adadelta', 'Adagrad', 'Adam', 'Adamax', 'Ftrl', 'Nadam', 'RMSprop', 'SGD', 'Momentum', 'Lamb', 'LARS']

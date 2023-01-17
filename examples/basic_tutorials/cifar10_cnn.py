@@ -127,7 +127,7 @@ class WithLoss(Module):
         return loss
 
 
-net_with_loss = WithLoss(net, loss_fn=tlx.losses.softmax_cross_entropy_with_logits)
+net_with_loss = WithLoss(net.mlu(), loss_fn=tlx.losses.softmax_cross_entropy_with_logits).mlu()
 net_with_train = TrainOneStep(net_with_loss, optimizer, train_weights)
 
 for epoch in range(n_epoch):
@@ -136,12 +136,12 @@ for epoch in range(n_epoch):
     train_loss, train_acc, n_iter = 0, 0, 0
     for X_batch, y_batch in train_dataset:
 
-        _loss_ce = net_with_train(X_batch, y_batch)
+        _loss_ce = net_with_train(X_batch.mlu(), y_batch.mlu())
         train_loss += _loss_ce
 
         n_iter += 1
-        _logits = net(X_batch)
-        metrics.update(_logits, y_batch)
+        _logits = net(X_batch.mlu())
+        metrics.update(_logits, y_batch.mlu())
         train_acc += metrics.result()
         metrics.reset()
         print("Epoch {} of {} took {}".format(epoch + 1, n_epoch, time.time() - start_time))

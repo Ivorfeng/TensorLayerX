@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import torch
+import torch_mlu
 import torch.nn.functional as F
 
 __all__ = [

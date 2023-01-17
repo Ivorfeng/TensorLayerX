@@ -2,74 +2,74 @@
 # -*- coding: utf-8 -*-
 
 # The same set of code can switch the backend with one line
-import os
-# os.environ['TL_BACKEND'] = 'tensorflow'
-# os.environ['TL_BACKEND'] = 'mindspore'
-# os.environ['TL_BACKEND'] = 'paddle'
-os.environ['TL_BACKEND'] = 'torch'
-
-import tensorlayerx as tlx
-from tensorlayerx.nn import Module
-from tensorlayerx.nn import Linear, Dropout
-from tensorlayerx.dataflow import Dataset, DataLoader
-
-X_train, y_train, X_val, y_val, X_test, y_test = tlx.files.load_mnist_dataset(shape=(-1, 784))
-
-
-class mnistdataset(Dataset):
-
-    def __init__(self, data=X_train, label=y_train):
-        self.data = data
-        self.label = label
-
-    def __getitem__(self, index):
-        data = self.data[index].astype('float32')
-        label = self.label[index].astype('int64')
-        return data, label
-
-    def __len__(self):
-        return len(self.data)
-
-
-class CustomModel(Module):
-
-    def __init__(self):
-        super(CustomModel, self).__init__()
-        self.dropout1 = Dropout(p=0.2)
-        self.linear1 = Linear(out_features=800, act=tlx.nn.ReLU, in_features=784)
-        self.dropout2 = Dropout(p=0.2)
-        self.linear2 = Linear(out_features=800, act=tlx.nn.ReLU, in_features=800)
-        self.dropout3 = Dropout(p=0.2)
-        self.linear3 = Linear(out_features=10, act=tlx.nn.ReLU, in_features=800)
-
-    def forward(self, x, foo=None):
-        z = self.dropout1(x)
-        z = self.linear1(z)
-        z = self.dropout2(z)
-        z = self.linear2(z)
-        z = self.dropout3(z)
-        out = self.linear3(z)
-        if foo is not None:
-            out = tlx.relu(out)
-        return out
-
-
-MLP = CustomModel()
-n_epoch = 50
-batch_size = 128
-print_freq = 2
-
-train_weights = MLP.trainable_weights
-optimizer = tlx.optimizers.Momentum(0.05, 0.9)
-metric = tlx.metrics.Accuracy()
-loss_fn = tlx.losses.softmax_cross_entropy_with_logits
-train_dataset = mnistdataset(data=X_train, label=y_train)
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-
-model = tlx.model.Model(network=MLP, loss_fn=loss_fn, optimizer=optimizer, metrics=metric)
-model.train(n_epoch=n_epoch, train_dataset=train_loader, print_freq=print_freq, print_train_batch=False)
-model.save_weights('./model.npz', format='npz_dict')
-model.load_weights('./model.npz', format='npz_dict')
+#import os
+## os.environ['TL_BACKEND'] = 'tensorflow'
+## os.environ['TL_BACKEND'] = 'mindspore'
+## os.environ['TL_BACKEND'] = 'paddle'
+#os.environ['TL_BACKEND'] = 'torch'
+#
+#import tensorlayerx as tlx
+#from tensorlayerx.nn import Module
+#from tensorlayerx.nn import Linear, Dropout
+#from tensorlayerx.dataflow import Dataset, DataLoader
+#
+#X_train, y_train, X_val, y_val, X_test, y_test = tlx.files.load_mnist_dataset(shape=(-1, 784))
+#
+#
+#class mnistdataset(Dataset):
+#
+#    def __init__(self, data=X_train, label=y_train):
+#        self.data = data
+#        self.label = label
+#
+#    def __getitem__(self, index):
+#        data = self.data[index].astype('float32')
+#        label = self.label[index].astype('int64')
+#        return data, label
+#
+#    def __len__(self):
+#        return len(self.data)
+#
+#
+#class CustomModel(Module):
+#
+#    def __init__(self):
+#        super(CustomModel, self).__init__()
+#        self.dropout1 = Dropout(p=0.2)
+#        self.linear1 = Linear(out_features=800, act=tlx.nn.ReLU, in_features=784)
+#        self.dropout2 = Dropout(p=0.2)
+#        self.linear2 = Linear(out_features=800, act=tlx.nn.ReLU, in_features=800)
+#        self.dropout3 = Dropout(p=0.2)
+#        self.linear3 = Linear(out_features=10, act=tlx.nn.ReLU, in_features=800)
+#
+#    def forward(self, x, foo=None):
+#        z = self.dropout1(x)
+#        z = self.linear1(z)
+#        z = self.dropout2(z)
+#        z = self.linear2(z)
+#        z = self.dropout3(z)
+#        out = self.linear3(z)
+#        if foo is not None:
+#            out = tlx.relu(out)
+#        return out
+#
+#
+#MLP = CustomModel()
+#n_epoch = 50
+#batch_size = 128
+#print_freq = 2
+#
+#train_weights = MLP.trainable_weights
+#optimizer = tlx.optimizers.Momentum(0.05, 0.9)
+#metric = tlx.metrics.Accuracy()
+#loss_fn = tlx.losses.softmax_cross_entropy_with_logits
+#train_dataset = mnistdataset(data=X_train, label=y_train)
+#train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+#
+#model = tlx.model.Model(network=MLP, loss_fn=loss_fn, optimizer=optimizer, metrics=metric)
+#model.train(n_epoch=n_epoch, train_dataset=train_loader, print_freq=print_freq, print_train_batch=True)
+#model.save_weights('./model.npz', format='npz_dict')
+#model.load_weights('./model.npz', format='npz_dict')
 
 ################################ TensorLayerX and TensorFlow can be mixed programming. #################################
 # import os
@@ -308,135 +308,135 @@ model.load_weights('./model.npz', format='npz_dict')
 # # model.eval(train_loader)
 
 ################################## TensorLayerX and Torch can be mixed programming. ##################################
-# import os
-# os.environ['TL_BACKEND'] = 'torch'
-#
-# import torch
-# from torch import nn
-# from torch.utils.data import DataLoader
-# from torchvision import datasets
-# from torchvision.transforms import ToTensor
-#
-# from tensorlayerx.nn import Module, Linear
-# import tensorlayerx as tlx
-#
-# # Download training data from open datasets.
-# training_data = datasets.FashionMNIST(
-#     root="data",
-#     train=True,
-#     download=True,
-#     transform=ToTensor(),
-# )
-#
-# # Download test data from open datasets.
-# test_data = datasets.FashionMNIST(
-#     root="data",
-#     train=False,
-#     download=True,
-#     transform=ToTensor(),
-# )
-#
-# batch_size = 64
-#
-# # Create data loaders.
-# train_dataloader = DataLoader(training_data, batch_size=batch_size)
-# test_dataloader = DataLoader(test_data, batch_size=batch_size)
-#
-# for X, y in test_dataloader:
-#     print("Shape of X [N, C, H, W]: ", X.shape)
-#     print("Shape of y: ", y.shape, y.dtype)
-#     break
-#
-# # Get cpu or gpu device for training.
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-# print("Using {} device".format(device))
-#
-# # Define model
-# # class NeuralNetwork(nn.Module):
-# #     def __init__(self):
-# #         super(NeuralNetwork, self).__init__()
-# #         self.flatten = nn.Flatten()
-# #         self.linear_relu_stack = nn.Sequential(
-# #             nn.Linear(28*28, 512),
-# #             nn.ReLU(),
-# #             nn.Linear(512, 512),
-# #             nn.ReLU(),
-# #             nn.Linear(512, 10)
-# #         )
-# #
-# #     def forward(self, x):
-# #         x = self.flatten(x)
-# #         logits = self.linear_relu_stack(x)
-# #         return logits
-#
-#
-# class NeuralNetwork(Module):
-#
+import os
+os.environ['TL_BACKEND'] = 'torch'
+
+import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torchvision import datasets
+from torchvision.transforms import ToTensor
+
+from tensorlayerx.nn import Module, Linear
+import tensorlayerx as tlx
+
+# Download training data from open datasets.
+training_data = datasets.FashionMNIST(
+    root="data",
+    train=True,
+    download=True,
+    transform=ToTensor(),
+)
+
+# Download test data from open datasets.
+test_data = datasets.FashionMNIST(
+    root="data",
+    train=False,
+    download=True,
+    transform=ToTensor(),
+)
+
+batch_size = 64
+
+# Create data loaders.
+train_dataloader = DataLoader(training_data, batch_size=batch_size)
+test_dataloader = DataLoader(test_data, batch_size=batch_size)
+
+for X, y in test_dataloader:
+    print("Shape of X [N, C, H, W]: ", X.shape)
+    print("Shape of y: ", y.shape, y.dtype)
+    break
+
+# Get cpu or gpu device for training.
+device = "mlu" if torch.mlu.is_available() else "cpu"
+print("Using {} device".format(device))
+
+# Define model
+# class NeuralNetwork(nn.Module):
 #     def __init__(self):
 #         super(NeuralNetwork, self).__init__()
 #         self.flatten = nn.Flatten()
-#         self.linear1 = Linear(in_features=28 * 28, out_features=512)
-#         self.linear2 = Linear(in_features=512, out_features=512)
-#         self.linear3 = Linear(in_features=512, out_features=10)
+#         self.linear_relu_stack = nn.Sequential(
+#             nn.Linear(28*28, 512),
+#             nn.ReLU(),
+#             nn.Linear(512, 512),
+#             nn.ReLU(),
+#             nn.Linear(512, 10)
+#         )
 #
 #     def forward(self, x):
 #         x = self.flatten(x)
-#         x = self.linear1(x)
-#         x = self.linear2(x)
-#         x = self.linear3(x)
-#         return x
-#
-#
-# model = NeuralNetwork().to(device)
-#
-# # loss_fn = nn.CrossEntropyLoss()
-# loss_fn = tlx.losses.softmax_cross_entropy_with_logits
-#
-# # optimizer = torch.optim.SGD(model.trainable_weights, lr=1e-3)
-# optimizer = tlx.optimizers.SGD(learning_rate=1e-3)
-#
-#
-# def train(dataloader, model, loss_fn, optimizer):
-#     size = len(dataloader.dataset)
-#     model.train()
-#     for batch, (X, y) in enumerate(dataloader):
-#         X, y = X.to(device), y.to(device)
-#
-#         # Compute prediction error
-#         pred = model(X)
-#         loss = loss_fn(pred, y)
-#
-#         # Backpropagation
-#         # optimizer.zero_grad()
-#         # loss.backward()
-#         # optimizer.step()
-#         grads = optimizer.gradient(loss, model.trainable_weights)
-#         optimizer.apply_gradients(zip(grads, model.trainable_weights))
-#
-#         if batch % 100 == 0:
-#             loss, current = loss.item(), batch * len(X)
-#             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-#
-#
-# def test(dataloader, model, loss_fn):
-#     size = len(dataloader.dataset)
-#     num_batches = len(dataloader)
-#     model.eval()
-#     test_loss, correct = 0, 0
-#     with torch.no_grad():
-#         for X, y in dataloader:
-#             X, y = X.to(device), y.to(device)
-#             pred = model(X)
-#             test_loss += loss_fn(pred, y).item()
-#             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
-#     test_loss /= num_batches
-#     correct /= size
-#     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
-#
-#
-# epochs = 5
-# for t in range(epochs):
-#     print(f"Epoch {t+1}\n-------------------------------")
-#     train(train_dataloader, model, loss_fn, optimizer)
-#     test(test_dataloader, model, loss_fn)
-# print("Done!")
+#         logits = self.linear_relu_stack(x)
+#         return logits
+
+
+class NeuralNetwork(Module):
+
+    def __init__(self):
+        super(NeuralNetwork, self).__init__()
+        self.flatten = nn.Flatten()
+        self.linear1 = Linear(in_features=28 * 28, out_features=512)
+        self.linear2 = Linear(in_features=512, out_features=512)
+        self.linear3 = Linear(in_features=512, out_features=10)
+
+    def forward(self, x):
+        x = self.flatten(x)
+        x = self.linear1(x)
+        x = self.linear2(x)
+        x = self.linear3(x)
+        return x
+
+
+model = NeuralNetwork().to(device)
+
+# loss_fn = nn.CrossEntropyLoss()
+loss_fn = tlx.losses.softmax_cross_entropy_with_logits
+
+# optimizer = torch.optim.SGD(model.trainable_weights, lr=1e-3)
+optimizer = tlx.optimizers.SGD(lr=1e-3)
+
+
+def train(dataloader, model, loss_fn, optimizer):
+    size = len(dataloader.dataset)
+    model.train()
+    for batch, (X, y) in enumerate(dataloader):
+        X, y = X.to(device), y.to(device)
+
+        # Compute prediction error
+        pred = model(X)
+        loss = loss_fn(pred, y)
+
+        # Backpropagation
+        # optimizer.zero_grad()
+        # loss.backward()
+        # optimizer.step()
+        grads = optimizer.gradient(loss, model.trainable_weights)
+        optimizer.apply_gradients(zip(grads, model.trainable_weights))
+
+        if batch % 100 == 0:
+            loss, current = loss.item(), batch * len(X)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+
+
+def test(dataloader, model, loss_fn):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    model.eval()
+    test_loss, correct = 0, 0
+    with torch.no_grad():
+        for X, y in dataloader:
+            X, y = X.to(device), y.to(device)
+            pred = model(X)
+            test_loss += loss_fn(pred, y).item()
+            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+    test_loss /= num_batches
+    correct /= size
+    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+
+
+epochs = 5
+for t in range(epochs):
+    print(f"Epoch {t+1}\n-------------------------------")
+    train(train_dataloader, model, loss_fn, optimizer)
+    test(test_dataloader, model, loss_fn)
+print("Done!")
