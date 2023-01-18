@@ -486,8 +486,8 @@ class Model:
         self, n_epoch, train_dataset, network, loss_fn, train_weights, optimizer, metrics, print_train_batch,
         print_freq, test_dataset
     ):
-        # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        # network = network.to(device)
+        device = torch.device('mlu:0' if torch.mlu.is_available() else 'cpu')
+        network = network.to(device)
         with Progress(TextColumn("[progress.description]{task.description}"),
                       BarColumn(),
                       TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
@@ -504,14 +504,14 @@ class Model:
                 train_loss, train_acc, n_iter = 0, 0, 0
                 for batch, (X_batch, y_batch) in enumerate(train_dataset):
                     network.set_train()
-                    output = network(X_batch)
-                    loss = loss_fn(output, y_batch)
+                    output = network(X_batch.to(device))
+                    loss = loss_fn(output, y_batch.to(device))
                     grads = optimizer.gradient(loss, train_weights)
                     optimizer.apply_gradients(zip(grads, train_weights))
 
                     train_loss += loss
                     if metrics:
-                        metrics.update(output, y_batch)
+                        metrics.update(output, y_batch.to(device))
                         train_acc += metrics.result()
                         metrics.reset()
                     else:

@@ -21,7 +21,8 @@ tlx.logging.set_verbosity(tlx.logging.DEBUG)
 
 # prepare cifar10 data
 X_train, y_train, X_test, y_test = tlx.files.load_cifar10_dataset(shape=(-1, 32, 32, 3), plotable=False)
-
+import torch
+device = torch.device('mlu:0' if torch.mlu.is_available() else 'cpu')
 
 class CNN(Module):
 
@@ -127,7 +128,7 @@ class WithLoss(Module):
         return loss
 
 
-net_with_loss = WithLoss(net.mlu(), loss_fn=tlx.losses.softmax_cross_entropy_with_logits).mlu()
+net_with_loss = WithLoss(net.to(device), loss_fn=tlx.losses.softmax_cross_entropy_with_logits).to(device)
 net_with_train = TrainOneStep(net_with_loss, optimizer, train_weights)
 
 for epoch in range(n_epoch):
@@ -136,12 +137,12 @@ for epoch in range(n_epoch):
     train_loss, train_acc, n_iter = 0, 0, 0
     for X_batch, y_batch in train_dataset:
 
-        _loss_ce = net_with_train(X_batch.mlu(), y_batch.mlu())
+        _loss_ce = net_with_train(X_batch.to(device), y_batch.to(device))
         train_loss += _loss_ce
 
         n_iter += 1
-        _logits = net(X_batch.mlu())
-        metrics.update(_logits, y_batch.mlu())
+        _logits = net(X_batch.to(device))
+        metrics.update(_logits, y_batch.to(device))
         train_acc += metrics.result()
         metrics.reset()
         print("Epoch {} of {} took {}".format(epoch + 1, n_epoch, time.time() - start_time))
